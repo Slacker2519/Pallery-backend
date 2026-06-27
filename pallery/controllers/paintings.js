@@ -1,4 +1,5 @@
 const Painting = require("../models/painting");
+const { cloudinary, upload } = require("../config/cloudinary");
 
 const getAllPaintings = async (req, res) => {
   const paintings = await Painting.find({});
@@ -8,6 +9,7 @@ const getAllPaintings = async (req, res) => {
 const getPainting = async (req, res) => {
   const { id: id } = req.params;
   const painting = await Painting.findOne({ _id: id });
+
   if (!painting) {
     return res.status(404).json({ msg: `No painting with id: ${id}` });
   }
@@ -22,14 +24,13 @@ const createPainting = async (req, res) => {
   const newPainting = new Painting({
     name,
     source,
-    tags: tags.split(","),
-    url: "#",
+    tags: tags ? tags.split(",") : [],
+    url: req.file ? req.file.path : req.body.url,
     author,
     authorUrl,
-    ownerId: req.user._id,
+    ownerId: "6a3e459455dc077dffc1b3c3",
     visibility: visibility || "public",
     description,
-    createdAt: Date.now(),
   });
 
   await newPainting.save();
@@ -37,11 +38,43 @@ const createPainting = async (req, res) => {
 };
 
 const updatePainting = async (req, res) => {
-  res.send("update painting");
+  const { id: id } = req.params;
+  const { name, source, tags, author, authorUrl, visibility, description } =
+    req.body;
+  const updatedPainting = await Painting.findOneAndUpdate(
+    { _id: id },
+    {
+      name,
+      source,
+      tags: tags ? tags.split(",") : [],
+      url: req.file ? req.file.path : req.body.url,
+      author,
+      authorUrl,
+      visibility: visibility || "public",
+      description,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  if (!updatedPainting) {
+    return res.status(404).json({ msg: `No painting with id: ${id}` });
+  }
+
+  res.status(200).json({ updatedPainting });
 };
 
 const deletePainting = async (req, res) => {
-  res.send("delete painting");
+  const { id: id } = req.params;
+  const deletedPainting = await Painting.findOneAndDelete({ _id: id });
+
+  if (!deletedPainting) {
+    return res.status(404).json({ msg: `No painting with id: ${id}` });
+  }
+
+  res.status(204).json({ deletedPainting });
 };
 
 module.exports = {

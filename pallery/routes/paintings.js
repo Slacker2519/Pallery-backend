@@ -9,7 +9,12 @@ const {
   deletePainting,
 } = require("../controllers/paintings");
 
-router.route("/").get(getAllPaintings).post(createPainting);
+const { upload } = require("../config/cloudinary");
+
+router
+  .route("/")
+  .get(getAllPaintings)
+  .post(upload.single("url"), createPainting);
 router
   .route("/:id")
   .get(getPainting)
