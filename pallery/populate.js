@@ -1,10 +1,12 @@
 require("dotenv").config();
+
 const dns = require("node:dns/promises");
 dns.setServers(["1.1.1.1", "1.0.0.1"]);
 
 const connectDB = require("./db/connect");
 const Painting = require("./models/painting");
 const User = require("./models/user");
+const { uploadToCloudinary } = require("./config/cloudinary");
 
 const jsonData = require("./initialData.json");
 
@@ -22,12 +24,21 @@ const start = async () => {
 
     await admin.save();
 
-    const paintings = jsonData.map((painting) => {
-      return new Painting({
-        ...painting,
-        ownerId: admin._id,
-      });
-    });
+    const paintings = await Promise.all(
+      jsonData.map(async (painting) => {
+        const { url, publicId } = await uploadToCloudinary(
+          painting.url,
+          "pallery",
+        );
+
+        return new Painting({
+          ...painting,
+          ownerId: admin._id,
+          url,
+          publicId,
+        });
+      }),
+    );
     await Painting.insertMany(paintings);
 
     console.log("Success!!!");

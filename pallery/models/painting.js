@@ -1,9 +1,17 @@
 const mongoose = require("mongoose");
 
 const paintingSchema = new mongoose.Schema({
+  publicId: { type: String },
   name: { type: String, required: [true, "painting name must be provided"] },
   source: { type: String },
-  tags: { type: [String], default: [] },
+  tags: {
+    type: [String],
+    default: [],
+    validate: {
+      validator: (tags) => new Set(tags).size === tags.length,
+      message: "tags must be unique",
+    },
+  },
   url: { type: String, required: [true, "painting url must be provided"] },
   author: { type: String },
   authorUrl: { type: String },
