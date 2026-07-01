@@ -25,7 +25,8 @@ const createPainting = async (req, res) => {
     name,
     source,
     tags: tags ? tags.split(",") : [],
-    url: req.file ? req.file.path : req.body.url,
+    url: req.file.path,
+    publicId: req.file.filename,
     author,
     authorUrl,
     ownerId: "6a3e459455dc077dffc1b3c3",
@@ -38,43 +39,30 @@ const createPainting = async (req, res) => {
 };
 
 const updatePainting = async (req, res) => {
-  const { id: id } = req.params;
-  const { name, source, tags, author, authorUrl, visibility, description } =
-    req.body;
-  const updatedPainting = await Painting.findOneAndUpdate(
-    { _id: id },
-    {
-      name,
-      source,
-      tags: tags ? tags.split(",") : [],
-      url: req.file ? req.file.path : req.body.url,
-      author,
-      authorUrl,
-      visibility: visibility || "public",
-      description,
-    },
-    {
-      new: true,
-      runValidators: true,
-    },
-  );
+  const painting = await Painting.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
-  if (!updatedPainting) {
-    return res.status(404).json({ msg: `No painting with id: ${id}` });
+  if (!painting) {
+    return res.status(404).json({ error: "Painting not found" });
   }
 
-  res.status(200).json({ updatedPainting });
+  res.status(200).json({ painting });
 };
 
 const deletePainting = async (req, res) => {
-  const { id: id } = req.params;
-  const deletedPainting = await Painting.findOneAndDelete({ _id: id });
+  const painting = await Painting.findOneAndDelete({ _id: req.params.id });
 
-  if (!deletedPainting) {
-    return res.status(404).json({ msg: `No painting with id: ${id}` });
+  if (!painting) {
+    return res.status(404).json({ error: "Painting not found" });
   }
 
-  res.status(204).json({ deletedPainting });
+  if (painting.publicId) {
+    const result = await cloudinary.uploader.destroy(painting.publicId);
+  }
+
+  res.json({ message: "Painting deleted" });
 };
 
 module.exports = {
