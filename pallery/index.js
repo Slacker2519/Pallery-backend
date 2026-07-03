@@ -28,7 +28,7 @@ app.use("/api/gallery/paintings", paintingRouter);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-const port = process.env.DEPLOYED_FRONT_END || process.env.LOCAL_FRONT_END;
+const port = process.env.PORT;
 const start = async () => {
   try {
     await connectDB(process.env.MONGODB_URI);
