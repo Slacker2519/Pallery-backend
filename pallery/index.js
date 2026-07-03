@@ -19,7 +19,11 @@ const notFoundMiddleware = require("./middleware/not-found");
 const errorMiddleware = require("./middleware/error-handler");
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: [process.env.LOCAL_FRONT_END, process.env.DEPLOYED_FRONT_END],
+  }),
+);
 app.use("/api/gallery/paintings", paintingRouter);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
