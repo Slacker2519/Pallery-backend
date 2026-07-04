@@ -2,7 +2,16 @@ const Painting = require("../models/painting");
 const { cloudinary, upload } = require("../config/cloudinary");
 
 const getAllPaintings = async (req, res) => {
-  const paintings = await Painting.find({});
+  const { name, tags, author, visibility } = req.query;
+
+  const queryObject = {};
+  if (name) queryObject.name = name;
+  if (tags) queryObject.tags = tags;
+  if (author) queryObject.author = author;
+  if (visibility)
+    queryObject.visibility = visibility === "public" ? "public" : "private";
+
+  const paintings = await Painting.find(queryObject);
   res.status(200).json({ paintings });
 };
 
