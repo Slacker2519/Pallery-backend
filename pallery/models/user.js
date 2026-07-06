@@ -1,14 +1,29 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: [true, "user name must be provided"] },
+  name: {
+    type: String,
+    required: [true, "user name must be provided"],
+    minlength: 3,
+    maxlength: 50,
+  },
   email: {
     type: String,
     required: [true, "Email address is required"],
+    match: [
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      "please provide a valid email address",
+    ],
     unique: true,
     lowercase: true,
     trim: true,
-    match: [/^[\w.-]+@[\w.-]+\.\w{2,}$/, "Please fill a valid email address"],
+  },
+  password: {
+    type: String,
+    required: [true, "Password is required"],
+    minlength: 6,
+    trim: true,
   },
   role: {
     type: String,
@@ -23,5 +38,25 @@ const userSchema = new mongoose.Schema({
   paintingIds: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now() },
 });
+
+userSchema.pre("save", async function () {
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+userSchema.methods.createJWT = function () {
+  return jwt.sign(
+    { userId: this._id, name: this.name },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_LIFETIME,
+    },
+  );
+};
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
+  return isMatch;
+};
 
 module.exports = mongoose.model("User", userSchema);

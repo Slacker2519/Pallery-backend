@@ -43,11 +43,10 @@ const createPainting = async (req, res) => {
     description,
   });
 
-  if (!newPainting.name || !newPainting.url || !newPainting.publicId) {
+  if (!newPainting.name || !newPainting.url) {
     if (newPainting.publicId) {
       const result = await cloudinary.uploader.destroy(newPainting.publicId);
     }
-
     return res.status(400).json({ error: "Name and URL are required" });
   }
 

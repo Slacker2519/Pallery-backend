@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 
 const paintingSchema = new mongoose.Schema({
   publicId: { type: String },
-  name: { type: String, required: [true, "painting name must be provided"] },
+  name: {
+    type: String,
+    required: [true, "painting name must be provided"],
+    maxlength: 50,
+  },
   source: { type: String },
   tags: {
     type: [String],
