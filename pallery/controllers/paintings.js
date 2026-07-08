@@ -1,18 +1,20 @@
 const Painting = require("../models/painting");
 const { cloudinary, upload } = require("../config/cloudinary");
+const { StatusCodes } = require("http-status-codes");
+const { BadRequest, NotFound } = require("../errors");
 
 const getAllPaintings = async (req, res) => {
-  const { name, tags, author, visibility } = req.query;
+  const { name, tags, author } = req.query;
 
-  const queryObject = {};
-  if (name) queryObject.name = name;
-  if (tags) queryObject.tags = tags;
-  if (author) queryObject.author = author;
-  if (visibility)
-    queryObject.visibility = visibility === "public" ? "public" : "private";
+  const queryObject = {
+    visibility: "public",
+  };
+  if (name) queryObject.name = { $regex: name, $options: "i" };
+  if (author) queryObject.author = { $regex: author, $options: "i" };
+  if (tags) queryObject.tags = { $in: [tags] };
 
   const paintings = await Painting.find(queryObject);
-  res.status(200).json({ paintings });
+  res.status(StatusCodes.OK).json({ paintings });
 };
 
 const getPainting = async (req, res) => {
@@ -20,10 +22,10 @@ const getPainting = async (req, res) => {
   const painting = await Painting.findOne({ _id: id });
 
   if (!painting) {
-    return res.status(404).json({ msg: `No painting with id: ${id}` });
+    throw new NotFound(`No painting with id: ${id}`);
   }
 
-  res.status(200).json({ painting });
+  res.status(StatusCodes.OK).json({ painting });
 };
 
 const createPainting = async (req, res) => {
@@ -47,11 +49,11 @@ const createPainting = async (req, res) => {
     if (newPainting.publicId) {
       const result = await cloudinary.uploader.destroy(newPainting.publicId);
     }
-    return res.status(400).json({ error: "Name and URL are required" });
+    throw new BadRequest("Name and URL are required");
   }
 
   await newPainting.save();
-  res.status(201).json({ newPainting });
+  res.status(StatusCodes.CREATED).json({ newPainting });
 };
 
 const updatePainting = async (req, res) => {
@@ -61,24 +63,24 @@ const updatePainting = async (req, res) => {
   });
 
   if (!painting) {
-    return res.status(404).json({ error: "Painting not found" });
+    throw new NotFound("Painting not found");
   }
 
-  res.status(200).json({ painting });
+  res.status(StatusCodes.OK).json({ painting });
 };
 
 const deletePainting = async (req, res) => {
   const painting = await Painting.findOneAndDelete({ _id: req.params.id });
 
   if (!painting) {
-    return res.status(404).json({ error: "Painting not found" });
+    throw new NotFound(`No painting with id: ${req.params.id}`);
   }
 
   if (painting.publicId) {
     const result = await cloudinary.uploader.destroy(painting.publicId);
   }
 
-  res.json({ message: "Painting deleted" });
+  res.status(StatusCodes.NO_CONTENT).json({ message: "Painting deleted" });
 };
 
 module.exports = {

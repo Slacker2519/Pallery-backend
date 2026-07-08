@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authentication");
 
 const {
   getAllPaintings,
@@ -14,11 +15,11 @@ const { upload } = require("../config/cloudinary");
 router
   .route("/")
   .get(getAllPaintings)
-  .post(upload.single("url"), createPainting);
+  .post(authMiddleware, upload.single("url"), createPainting);
 router
   .route("/:id")
   .get(getPainting)
-  .patch(updatePainting)
-  .delete(deletePainting);
+  .patch(authMiddleware, updatePainting)
+  .delete(authMiddleware, deletePainting);
 
 module.exports = router;

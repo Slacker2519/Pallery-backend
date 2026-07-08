@@ -6,10 +6,15 @@ const albumSchema = new mongoose.Schema({
     required: [true, "album name must be provided"],
     maxlength: 50,
   },
-  paintingsId: { type: [String], default: [] },
   ownerId: {
     type: String,
     required: [true, "owner id must be provided"],
+  },
+  paintingsId: { type: [String], default: [] },
+  visibility: {
+    type: String,
+    enum: ["public", "private"],
+    default: "public",
   },
 });
 

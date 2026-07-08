@@ -13,6 +13,7 @@ const jsonData = require("./initialData.json");
 const admin = new User({
   name: "admin",
   email: "tienduongeng2001@gmail.com",
+  password: "secretpassword",
   role: "admin",
 });
 
@@ -31,14 +32,18 @@ const start = async () => {
           "pallery",
         );
 
-        return new Painting({
+        const newPainting = new Painting({
           ...painting,
           ownerId: admin._id,
           url,
           publicId,
         });
+
+        admin.paintingIds.push(newPainting._id);
+        return newPainting;
       }),
     );
+    await admin.save();
     await Painting.insertMany(paintings);
 
     console.log("Success!!!");
