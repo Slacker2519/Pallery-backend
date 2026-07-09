@@ -14,13 +14,13 @@ const getUser = async (req, res) => {
 };
 
 const getUserAllPaintings = async (req, res) => {
-  if (req.params.id !== req.user.userId) {
+  if (req.params.id !== req.user.id) {
     throw new Unauthenticated("Not authorized to access this resource");
   }
 
   const { name, tags, author, description } = req.query;
   const queryObject = {
-    ownerId: req.user.userId,
+    ownerId: req.user.id,
   };
   if (name) queryObject.name = { $regex: name, $options: "i" };
   if (author) queryObject.author = { $regex: author, $options: "i" };
@@ -33,13 +33,13 @@ const getUserAllPaintings = async (req, res) => {
 };
 
 const getUserAllAlbums = async (req, res) => {
-  if (req.params.id !== req.user.userId) {
+  if (req.params.id !== req.user.id) {
     throw new Unauthenticated("Not authorized to access this resource");
   }
 
   const { name, paintingsId } = req.query;
   const queryObject = {
-    ownerId: req.user.userId,
+    ownerId: req.user.id,
   };
   if (name) queryObject.name = { $regex: name, $options: "i" };
   if (paintingsId) queryObject.paintingsId = { $in: [paintingsId] };

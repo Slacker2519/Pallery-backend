@@ -5,7 +5,18 @@ const { BadRequest, Unauthenticated } = require("../errors");
 const register = async (req, res) => {
   const user = await User.create({ ...req.body });
   const token = user.createJWT();
-  res.status(StatusCodes.CREATED).json({ user: { name: user.name }, token });
+  res.status(StatusCodes.OK).json({
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      albumIds: user.albumIds,
+      paintingIds: user.paintingIds,
+      createdAt: user.createdAt,
+    },
+    token,
+  });
 };
 
 const login = async (req, res) => {
