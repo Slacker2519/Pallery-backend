@@ -1,4 +1,5 @@
 require("dotenv").config();
+const bcrypt = require("bcryptjs");
 
 const dns = require("node:dns/promises");
 dns.setServers(["1.1.1.1", "1.0.0.1"]);
@@ -10,18 +11,18 @@ const { uploadToCloudinary } = require("./config/cloudinary");
 
 const jsonData = require("./initialData.json");
 
-const admin = new User({
-  name: "admin",
-  email: "tienduongeng2001@gmail.com",
-  password: "secretpassword",
-  role: "admin",
-});
-
 const start = async () => {
   try {
     await connectDB(process.env.MONGODB_URI);
     await Painting.deleteMany();
     await User.deleteMany();
+
+    const admin = new User({
+      name: "admin",
+      email: "tienduongeng2001@gmail.com",
+      password: "secretpassword",
+      role: "admin",
+    });
 
     await admin.save();
 

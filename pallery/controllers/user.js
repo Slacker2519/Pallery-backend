@@ -7,11 +7,9 @@ const { BadRequest, NotFound, Unauthenticated } = require("../errors");
 const getUser = async (req, res) => {
   const { id: id } = req.params;
   const user = await User.findOne({ _id: id });
-
   if (!user) {
     throw new NotFound(`No user with this id: ${id}`);
   }
-
   res.status(StatusCodes.OK).json({ user });
 };
 
