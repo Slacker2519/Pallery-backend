@@ -49,16 +49,26 @@ const getUserAllAlbums = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  const { name, email, password } = req.body;
+
+  const user = await User.findById(req.params.id);
 
   if (!user) {
     throw new NotFound("User not found");
   }
 
-  res.status(StatusCodes.OK).json({ user });
+  if (name) user.name = name;
+  if (email) user.email = email;
+  if (password) user.password = password;
+  await user.save();
+
+  res.status(StatusCodes.OK).json({
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+  });
 };
 
 module.exports = {
