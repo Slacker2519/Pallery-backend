@@ -32,6 +32,13 @@ const createPainting = async (req, res) => {
   const { name, source, tags, author, authorUrl, visibility, description } =
     req.body;
 
+  if (!name) {
+    if (req.file?.filename) {
+      await cloudinary.uploader.destroy(req.file.filename);
+    }
+    throw new BadRequest("Name is required");
+  }
+
   const newPainting = new Painting({
     name,
     source,
@@ -40,17 +47,10 @@ const createPainting = async (req, res) => {
     publicId: req.file.filename,
     author,
     authorUrl,
-    ownerId: "6a3e459455dc077dffc1b3c3",
+    ownerId: req.user.id,
     visibility: visibility || "public",
     description,
   });
-
-  if (!newPainting.name || !newPainting.url) {
-    if (newPainting.publicId) {
-      const result = await cloudinary.uploader.destroy(newPainting.publicId);
-    }
-    throw new BadRequest("Name and URL are required");
-  }
 
   await newPainting.save();
   res.status(StatusCodes.CREATED).json({ newPainting });
