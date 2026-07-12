@@ -11,9 +11,10 @@ cloudinary.config({
 });
 
 const connectDB = require("./db/connect");
-const paintingRouter = require("./routes/paintings");
+const paintingRouter = require("./routes/painting");
 const authRouter = require("./routes/auth");
 const userRouter = require("./routes/user");
+const albumRouter = require("./routes/album");
 
 const notFoundMiddleware = require("./middleware/not-found");
 const errorHandlerMiddleware = require("./middleware/error-handler");
@@ -27,7 +28,7 @@ app.use(
 app.use("/api/gallery/paintings", paintingRouter);
 app.use("/api/gallery/auth", authRouter);
 app.use("/api/gallery/users", userRouter);
-
+app.use("/api/gallery/albums", albumRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 

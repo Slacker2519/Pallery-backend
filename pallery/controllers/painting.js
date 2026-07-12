@@ -80,7 +80,7 @@ const deletePainting = async (req, res) => {
     const result = await cloudinary.uploader.destroy(painting.publicId);
   }
 
-  res.status(StatusCodes.NO_CONTENT).json({ message: "Painting deleted" });
+  res.status(StatusCodes.NO_CONTENT);
 };
 
 module.exports = {

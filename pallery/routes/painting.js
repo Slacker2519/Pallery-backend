@@ -8,7 +8,7 @@ const {
   createPainting,
   updatePainting,
   deletePainting,
-} = require("../controllers/paintings");
+} = require("../controllers/painting");
 
 const { upload } = require("../config/cloudinary");
 
