@@ -37,12 +37,12 @@ const getUserAllAlbums = async (req, res) => {
     throw new Unauthenticated("Not authorized to access this resource");
   }
 
-  const { name, paintingsId } = req.query;
+  const { name, paintingIds } = req.query;
   const queryObject = {
     ownerId: req.user.id,
   };
   if (name) queryObject.name = { $regex: name, $options: "i" };
-  if (paintingsId) queryObject.paintingsId = { $in: [paintingsId] };
+  if (paintingIds) queryObject.paintingsId = { $in: [paintingIds] };
 
   const albums = await Album.find(queryObject);
   res.status(StatusCodes.OK).json({ albums });

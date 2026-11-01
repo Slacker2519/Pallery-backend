@@ -23,7 +23,7 @@ const getAlbum = async (req, res) => {
 };
 
 const createAlbum = async (req, res) => {
-  const { name, paintingsId, visibility } = req.body;
+  const { name, paintingIds, description, visibility } = req.body;
 
   if (!name) {
     throw new BadRequest("Name is required");
@@ -32,8 +32,9 @@ const createAlbum = async (req, res) => {
   const album = await Albums.create({
     name,
     ownerId: req.user.id,
-    paintingsId,
-    visibility,
+    paintingIds,
+    description,
+    visibility: visibility || "private"
   });
   res.status(StatusCodes.CREATED).json({ album });
 };
@@ -45,9 +46,10 @@ const updateAlbum = async (req, res) => {
   if (album.ownerId !== req.user.id)
     throw new Unauthorized("You are not authorized to update this album");
 
-  const { name, paintingsId, visibility } = req.body;
+  const { name, paintingIds, description, visibility } = req.body;
   if (name) album.name = name;
-  if (paintingsId) album.paintingsId = paintingsId;
+  if (paintingIds) album.paintingIds = paintingIds;
+  if (description !== undefined) album.description = description;
   if (visibility) album.visibility = visibility;
 
   await album.save();

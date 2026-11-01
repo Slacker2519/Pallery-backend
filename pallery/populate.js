@@ -19,7 +19,7 @@ const start = async () => {
 
     const admin = new User({
       name: "admin",
-      email: "tienduongeng2001@gmail.com",
+      email: "admin@gmail.com",
       password: "secretpassword",
       role: "admin",
     });
