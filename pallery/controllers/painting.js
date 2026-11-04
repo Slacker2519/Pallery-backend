@@ -21,6 +21,11 @@ const getPainting = async (req, res) => {
   const { id: id } = req.params;
   const painting = await Painting.findOne({ _id: id });
 
+  const isOwner = req.user && painting.ownerId.toString() === req.user.id;
+  if (painting.visibility === "private" && !isOwner) {
+    throw new NotFound(`Painting with id ${req.params.id} not found`);
+  }
+
   if (!painting) {
     throw new NotFound(`No painting with id: ${id}`);
   }

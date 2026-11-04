@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authentication");
+const optionalAuth = require("../middleware/authentication");
 
 const {
   getAllPaintings,
@@ -18,7 +19,7 @@ router
   .post(authMiddleware, upload.single("url"), createPainting);
 router
   .route("/:id")
-  .get(getPainting)
+  .get(optionalAuth, getPainting)
   .patch(authMiddleware, updatePainting)
   .delete(authMiddleware, deletePainting);
 

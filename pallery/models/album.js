@@ -11,6 +11,7 @@ const albumSchema = new mongoose.Schema({
     required: [true, "owner id must be provided"],
   },
   paintingIds: { type: [String], default: [] },
+  coverPaintingId: { type: String, default: null },
   description: {
     type: String,
     default: "",
@@ -21,6 +22,6 @@ const albumSchema = new mongoose.Schema({
     enum: ["public", "private"],
     default: "public",
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Album", albumSchema);

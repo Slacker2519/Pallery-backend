@@ -1,6 +1,7 @@
 const Albums = require("../models/album");
+const Painting = require("../models/painting");
 const { StatusCodes } = require("http-status-codes");
-const { BadRequest, NotFound } = require("../errors");
+const { BadRequest, NotFound, Unauthenticated } = require("../errors");
 
 const getAllAlbums = async (req, res) => {
   const { name, visibility } = req.query;
@@ -14,16 +15,31 @@ const getAllAlbums = async (req, res) => {
 };
 
 const getAlbum = async (req, res) => {
-  const { id: id } = req.params;
-  const album = await Albums.findOne({ _id: id });
-  if (!album) {
-    throw new NotFound(`Album with id ${id} not found`);
+  const album = await Albums.findById(req.params.id);
+  if (!album) throw new NotFound(`Album with id ${req.params.id} not found`);
+
+  const isOwner = req.user && album.ownerId.toString() === req.user.id;
+
+  console.log({
+    visibility: album.visibility,
+    ownerId: album.ownerId.toString(),
+    viewer: req.user,
+  });
+
+  if (album.visibility === "private" && !isOwner) {
+    throw new NotFound(`Album with id ${req.params.id} not found`);
   }
-  res.status(StatusCodes.OK).json({ album });
+
+  const paintingQuery = { _id: { $in: album.paintingIds } };
+  if (!isOwner) paintingQuery.visibility = "public";
+
+  const paintings = await Painting.find(paintingQuery);
+
+  res.status(StatusCodes.OK).json({ album, paintings });
 };
 
 const createAlbum = async (req, res) => {
-  const { name, paintingIds, description, visibility } = req.body;
+  const { name, paintingIds, coverPaintingId, description, visibility } = req.body;
 
   if (!name) {
     throw new BadRequest("Name is required");
@@ -33,6 +49,7 @@ const createAlbum = async (req, res) => {
     name,
     ownerId: req.user.id,
     paintingIds,
+    coverPaintingId: normalizeCover(coverPaintingId, paintingIds),
     description,
     visibility: visibility || "private"
   });
@@ -43,14 +60,20 @@ const updateAlbum = async (req, res) => {
   const album = await Albums.findById(req.params.id);
 
   if (!album) throw new NotFound(`Album with id ${req.params.id} not found`);
-  if (album.ownerId !== req.user.id)
-    throw new Unauthorized("You are not authorized to update this album");
+  if (album.ownerId.toString() !== req.user.id)
+    throw new Unauthenticated("You are not authorized to update this album");
 
   const { name, paintingIds, description, visibility } = req.body;
   if (name) album.name = name;
   if (paintingIds) album.paintingIds = paintingIds;
   if (description !== undefined) album.description = description;
   if (visibility) album.visibility = visibility;
+
+  const { coverPaintingId } = req.body;
+  album.coverPaintingId = normalizeCover(
+      coverPaintingId !== undefined ? coverPaintingId : album.coverPaintingId,
+      album.paintingIds,
+  );
 
   await album.save();
   res.status(StatusCodes.OK).json({ album });
@@ -61,13 +84,16 @@ const deleteAlbum = async (req, res) => {
 
   if (!album) throw new NotFound(`Album with id ${req.params.id} not found`);
 
-  if (album.ownerId.toString() !== req.user.userId) {
+  if (album.ownerId.toString() !== req.user.id) {
     throw new Unauthenticated("You are not authorized to delete this album");
   }
 
   await album.deleteOne();
-  res.status(StatusCodes.NO_CONTENT);
+  res.status(StatusCodes.OK).json({ message: "Album deleted." });
 };
+
+const normalizeCover = (coverPaintingId, paintingIds = []) =>
+    coverPaintingId && paintingIds.includes(coverPaintingId) ? coverPaintingId : null;
 
 module.exports = {
   getAllAlbums,

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authentication");
+const optionalAuth = require("../middleware/authentication");
 
 const {
   getAllAlbums,
@@ -13,7 +14,7 @@ const {
 router.route("/").get(getAllAlbums).post(authMiddleware, createAlbum);
 router
   .route("/:id")
-  .get(getAlbum)
+  .get(optionalAuth, getAlbum)
   .patch(authMiddleware, updateAlbum)
   .delete(authMiddleware, deleteAlbum);
 
