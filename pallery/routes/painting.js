@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authentication");
-const optionalAuth = require("../middleware/authentication");
+const optionalAuth = require("../middleware/optional-auth");
 
 const {
   getAllPaintings,

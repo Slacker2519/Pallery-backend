@@ -25,10 +25,10 @@ app.use(
   }),
 );
 
-app.use("/api/gallery/paintings", paintingRouter);
 app.use("/api/gallery/auth", authRouter);
-app.use("/api/gallery/users", userRouter);
 app.use("/api/gallery/albums", albumRouter);
+app.use("/api/gallery/users", userRouter);
+app.use("/api/gallery/paintings", paintingRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 

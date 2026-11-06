@@ -1,5 +1,5 @@
-const Albums = require("../models/album");
 const Painting = require("../models/painting");
+const Albums = require("../models/album");
 const { StatusCodes } = require("http-status-codes");
 const { BadRequest, NotFound, Unauthenticated } = require("../errors");
 
@@ -10,7 +10,19 @@ const getAllAlbums = async (req, res) => {
   if (name) queryObject.name = { $regex: name, $options: "i" };
   queryObject.visibility = visibility === "private" ? "private" : "public";
 
-  const albums = await Albums.find(queryObject);
+  let albums = await Albums.find(queryObject);
+
+  if (!isOwner) {
+    const publicPaintings = await Painting
+        .find({ ownerId: req.params.id, visibility: "public" })
+        .select("_id");
+    const publicIds = new Set(publicPaintings.map((p) => p._id.toString()));
+
+    albums = abums.filter((album) =>
+        (album.paintingIds || []).some((pid) => publicIds.has(String(pid))),
+    );
+  }
+
   res.status(StatusCodes.OK).json({ albums });
 };
 
@@ -19,12 +31,6 @@ const getAlbum = async (req, res) => {
   if (!album) throw new NotFound(`Album with id ${req.params.id} not found`);
 
   const isOwner = req.user && album.ownerId.toString() === req.user.id;
-
-  console.log({
-    visibility: album.visibility,
-    ownerId: album.ownerId.toString(),
-    viewer: req.user,
-  });
 
   if (album.visibility === "private" && !isOwner) {
     throw new NotFound(`Album with id ${req.params.id} not found`);

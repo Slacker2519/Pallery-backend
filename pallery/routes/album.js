@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middleware/authentication");
-const optionalAuth = require("../middleware/authentication");
+const optionalAuth = require("../middleware/optional-auth");
 
 const {
   getAllAlbums,
@@ -11,7 +11,10 @@ const {
   deleteAlbum,
 } = require("../controllers/album");
 
-router.route("/").get(getAllAlbums).post(authMiddleware, createAlbum);
+router
+    .route("/")
+    .get(getAllAlbums)
+    .post(authMiddleware, createAlbum);
 router
   .route("/:id")
   .get(optionalAuth, getAlbum)
