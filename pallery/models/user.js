@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
+  avatarUrl: { type: String, default: "" },
+  avatarPublicId: { type: String, default: "" },
   name: {
     type: String,
     required: [true, "user name must be provided"],

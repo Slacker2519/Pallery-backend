@@ -26,6 +26,20 @@ const storage = new CloudinaryStorage({
   },
 });
 
+const avatarStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "pallery/avatars",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 256, height: 256, crop: "fill", gravity: "auto" }],
+  },
+});
+
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
-module.exports = { cloudinary, upload, uploadToCloudinary };
+module.exports = { cloudinary, upload, uploadToCloudinary, avatarUpload };
